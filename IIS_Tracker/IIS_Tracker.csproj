@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\js\webgl\2D\" />
-    <Folder Include="wwwroot\js\webgl\3D\" />
     <Folder Include="wwwroot\js\webgl\Math\" />
   </ItemGroup>
 

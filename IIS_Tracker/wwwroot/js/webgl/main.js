@@ -9,43 +9,54 @@ function main() {
 
     var renderEngine = new RenderingEngine();
     var gl = renderEngine.glContext();
-
     var shaderTools = new ShaderTools(gl);
 
-    const shaderProgram = shaderTools.initShaderProgram(vsSource, fsSource);
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // SETUP
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    const shaderProgram = shaderTools.initShaderProgram(vsTextureSource, fsTextureSource);
 
     // eventually abstract out
+    //const programInfo = {
+    //    program: shaderProgram,
+    //    attribLocations: {
+    //        vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+    //        vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+    //    },
+    //    uniformLocations: {
+    //        projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
+    //        modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+    //    },
+    //};
+
     const programInfo = {
         program: shaderProgram,
         attribLocations: {
             vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-            vertexColor: gl.getAttribLocation(shaderProgram, 'aVertexColor'),
+            uvCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
         },
         uniformLocations: {
             projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
             modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+            uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
         },
     };
 
-    const square =
-        [ // x, y           R, G, B
-            -1.0,  1.0,   
-             1.0,  1.0,
-            -1.0, -1.0,
-             1.0, -1.0,
-        ];
+    let cube = new Cube();
 
-    const colors = [
-        1.0, 1.0, 1.0, 1.0, // white
-        1.0, 0.0, 0.0, 1.0, // red
-        0.0, 1.0, 0.0, 1.0, // green 
-        0.0, 0.0, 1.0, 1.0, // blue
-    ];
+    // create buffers
+    const buffers = shaderTools.initBuffers(
+        new Float32Array(cube.positions),
+        new Uint16Array(cube.indices),
+        new Float32Array(cube.uvCoordinates)
+    );
 
-    const buffers = shaderTools.initBuffers(new Float32Array(square), new Float32Array(colors));
+    // load the texture
+    const texture = shaderTools.loadTexture('./resources/wicker/wicker-albedo.png');
 
-
-    // animation loop
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // RENDER
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
     var prev = 0;
 
     this.render = function (now) {
@@ -53,9 +64,7 @@ function main() {
         const delta = now - prev;
         prev = now;
 
-        //console.log(delta);
-
-        renderEngine.drawScene(gl, programInfo, buffers, delta);
+        renderEngine.drawScene(gl, programInfo, buffers, texture, delta);
 
         requestAnimationFrame(render);
     }
